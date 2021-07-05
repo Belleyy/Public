@@ -26,18 +26,20 @@
             }
         }, 1000
     );
-
     function gmMain() {
         //console.debug("New page")
         // Waiting element to appear
-        waitForElementClass("duplicate-group", function () {
-            // Restore the display of separator element
-            var separator = document.getElementsByClassName("separator")
-            for (let i = 0; i < separator.length; i++) {
-                separator[i].style.display = 'table-row'
-            }
-            addingButton()
-        });
+        var URL = window.location.href;
+        if (URL.match(/sceneDuplicateChecker/) != null) { // Duplicate checker page
+            waitForElementClass("duplicate-group", function () {
+                // Restore the display of separator element
+                var separator = document.getElementsByClassName("separator")
+                for (let i = 0; i < separator.length; i++) {
+                    separator[i].style.display = 'table-row'
+                }
+                addingButton()
+            });
+        }
     }
 
     function addingButton() {
