@@ -1,8 +1,10 @@
 // ==UserScript==
 // @name         Stash Duplicate Finder Hider
 // @version      0.1
-// @description  Hide scene in the duplicate
+// @description  Hide scene in the duplicate finder tool
 // @author       Belley
+// @icon         https://stashapp.cc/images/stash.svg
+// @homepageURL  https://github.com/Belleyy/Public/blob/main/Userscript_stash_duplicate
 // @match        http://localhost:9999/sceneDuplicateChecker*
 // @grant        GM_setValue
 // @grant        GM_getValue
@@ -25,55 +27,37 @@
         }, 1000
     );
 
-    function gmMain(){
-        //console.debug("changed page")
-        var div_sepa = document.getElementsByClassName("separator")
-        for (let i = 0; i < div_sepa.length; i++) {
-            div_sepa[i].style.display = 'table-row'
-        }
+    function gmMain() {
+        //console.debug("New page")
+        // Waiting element to appear
         waitForElementClass("duplicate-group", function () {
+            // Restore the display of separator element
+            var separator = document.getElementsByClassName("separator")
+            for (let i = 0; i < separator.length; i++) {
+                separator[i].style.display = 'table-row'
+            }
             addingButton()
         });
     }
 
-    function addingButton_show(){
-        var button_show = document.createElement("button");
-        if (!document.getElementById("userscript_show_duplicate")){
-            button_show.className = "btn btn-secondary"
-            button_show.id = "userscript_show_duplicate"
-            button_show.title = "Show hidden duplicate(s)";
-            button_show.innerHTML = '<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="pencil-alt" class="svg-inline--fa fa-pencil-alt fa-w-16 fa-icon undefined" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="3 5 15 10"><path fill="currentColor" d="M5.114,5.726c0.169,0.168,0.442,0.168,0.611,0c0.168-0.169,0.168-0.442,0-0.61L3.893,3.282c-0.168-0.168-0.442-0.168-0.61,0c-0.169,0.169-0.169,0.442,0,0.611L5.114,5.726z M3.955,10c0-0.239-0.193-0.432-0.432-0.432H0.932C0.693,9.568,0.5,9.761,0.5,10s0.193,0.432,0.432,0.432h2.591C3.761,10.432,3.955,10.239,3.955,10 M10,3.955c0.238,0,0.432-0.193,0.432-0.432v-2.59C10.432,0.693,10.238,0.5,10,0.5S9.568,0.693,9.568,0.932v2.59C9.568,3.762,9.762,3.955,10,3.955 M14.886,5.726l1.832-1.833c0.169-0.168,0.169-0.442,0-0.611c-0.169-0.168-0.442-0.168-0.61,0l-1.833,1.833c-0.169,0.168-0.169,0.441,0,0.61C14.443,5.894,14.717,5.894,14.886,5.726 M5.114,14.274l-1.832,1.833c-0.169,0.168-0.169,0.441,0,0.61c0.168,0.169,0.442,0.169,0.61,0l1.833-1.832c0.168-0.169,0.168-0.442,0-0.611C5.557,14.106,5.283,14.106,5.114,14.274 M19.068,9.568h-2.591c-0.238,0-0.433,0.193-0.433,0.432s0.194,0.432,0.433,0.432h2.591c0.238,0,0.432-0.193,0.432-0.432S19.307,9.568,19.068,9.568 M14.886,14.274c-0.169-0.168-0.442-0.168-0.611,0c-0.169,0.169-0.169,0.442,0,0.611l1.833,1.832c0.168,0.169,0.441,0.169,0.61,0s0.169-0.442,0-0.61L14.886,14.274z M10,4.818c-2.861,0-5.182,2.32-5.182,5.182c0,2.862,2.321,5.182,5.182,5.182s5.182-2.319,5.182-5.182C15.182,7.139,12.861,4.818,10,4.818M10,14.318c-2.385,0-4.318-1.934-4.318-4.318c0-2.385,1.933-4.318,4.318-4.318c2.386,0,4.318,1.933,4.318,4.318C14.318,12.385,12.386,14.318,10,14.318 M10,16.045c-0.238,0-0.432,0.193-0.432,0.433v2.591c0,0.238,0.194,0.432,0.432,0.432s0.432-0.193,0.432-0.432v-2.591C10.432,16.238,10.238,16.045,10,16.045"></path></svg>'
-            document.getElementsByClassName("d-flex mb-2")[0].appendChild(button_show)
-            document.getElementById("userscript_show_duplicate").addEventListener("click", function () {
-                GM_deleteValue("hide_duplicate")
-                window.location.reload();
-            });
-        }
-    }
-    function count_hidden(){
-        var stored_path = GM_getValue("hide_duplicate","")
-        if (stored_path){
-            var count = stored_path.split(",").length
-            var elemnt_text = getElementByXpath("//h6[contains(text(),'duplicates found')]")
-            var text = elemnt_text.textContent.replace(/\..+/gm, ".");
-            elemnt_text.textContent = text + " (Hidden: " + count + ")"
-        }
-    }
     function addingButton() {
-        var stored_path = GM_getValue("hide_duplicate","")
+        var stored_path = GM_getValue("hide_duplicate", "")
         if (stored_path) {
             addingButton_show()
             count_hidden()
-            var scene_path = document.getElementsByClassName("scene-path")
-            for (let i = 0; i < scene_path.length; i++) {
-                let text = scene_path[i].textContent
-                if (stored_path.includes(text)) {
-                    scene_path[i].parentElement.parentElement.style.display = "none";
-                    scene_path[i].parentElement.parentElement.nextElementSibling.style.display = "none";
+            var element_path = document.getElementsByClassName("scene-path")
+            for (let i = 0; i < element_path.length; i++) {
+                let scene_path = element_path[i].textContent
+                if (stored_path.includes(scene_path)) {
+                    // line 1
+                    element_path[i].parentElement.parentElement.style.display = "none";
+                    // line 2
+                    element_path[i].parentElement.parentElement.nextElementSibling.style.display = "none";
+                    // line 3 separator
                     try {
-                        var check_class = scene_path[i].parentElement.parentElement.nextElementSibling.nextElementSibling.className
-                        if (check_class == "separator"){
-                            scene_path[i].parentElement.parentElement.nextElementSibling.nextElementSibling.style.display = "none";
+                        var check_class = element_path[i].parentElement.parentElement.nextElementSibling.nextElementSibling.className
+                        if (check_class == "separator") {
+                            element_path[i].parentElement.parentElement.nextElementSibling.nextElementSibling.style.display = "none";
                         }
                     } catch (error) {
                     }
@@ -81,36 +65,67 @@
                 }
             }
         }
-        console.debug("what")
-        var div_sepa = document.getElementsByClassName("separator")
-        for (let i = 0; i < div_sepa.length; i++) {
-            if (div_sepa[i].style.display == 'none'){
+        var separator = document.getElementsByClassName("separator")
+        for (let i = 0; i < separator.length; i++) {
+            // Prevent useless change
+            if (separator[i].style.display == 'none') {
                 continue
             }
-            div_sepa[i].innerHTML = '<tr class="separator" style=""><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><button type="button" style="background-color: #108a29;border-color: #2b3c59;color: #fff;padding-top: 0.1rem;padding-bottom: 0.1rem;padding-left: 0.75rem;padding-right: 0.75rem;margin-right: 10px;" class="btn userscript_hide">Hide</button></td></tr>'
+            // adding the hide button
+            separator[i].innerHTML = '<tr class="separator" style=""><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><button type="button" style="background-color: #108a29;border-color: #2b3c59;color: #fff;padding-top: 0.1rem;padding-bottom: 0.1rem;padding-left: 0.75rem;padding-right: 0.75rem;margin-right: 10px;" class="btn userscript_hide">Hide</button></td></tr>'
         }
-        var button_userscript = document.getElementsByClassName("userscript_hide")
-        for (let i = 0; i < button_userscript.length; i++) {
-            button_userscript[i].addEventListener("click", function () {
-                var line1 = button_userscript[i].parentElement.parentElement.previousElementSibling.previousElementSibling
-                var line2 = button_userscript[i].parentElement.parentElement.previousElementSibling
-                var seperator = button_userscript[i].parentElement.parentElement
-                line1.style.display = "none";
-                line2.style.display = "none";
-                seperator.style.display = "none";
+        var button_hide = document.getElementsByClassName("userscript_hide")
+        for (let i = 0; i < button_hide.length; i++) {
+            button_hide[i].addEventListener("click", function () {
+                var group_line1 = button_hide[i].parentElement.parentElement.previousElementSibling.previousElementSibling
+                var group_line2 = button_hide[i].parentElement.parentElement.previousElementSibling
+                var group_seperator = button_hide[i].parentElement.parentElement
+                // hide element
+                group_line1.style.display = "none";
+                group_line2.style.display = "none";
+                group_seperator.style.display = "none";
 
-                var path = line1.getElementsByClassName("scene-path")[0].textContent
-                var stored_path = GM_getValue("hide_duplicate","")
+                var scene_path = group_line1.getElementsByClassName("scene-path")[0].textContent
+                var stored_path = GM_getValue("hide_duplicate", "")
                 if (stored_path) {
-                    GM_setValue("hide_duplicate", stored_path + ", " + path);
+                    GM_setValue("hide_duplicate", stored_path + ", " + scene_path);
                 } else {
-                    GM_setValue("hide_duplicate", path);
+                    GM_setValue("hide_duplicate", scene_path);
                 }
+                // add the button to restore hidden
                 addingButton_show()
+                // add the number hidden in the "{} of duplicates found"
                 count_hidden()
             }, false);
         }
     }
+
+    function addingButton_show() {
+        // create button to restore hidden duplicate
+        var button_show = document.createElement("button");
+        if (!document.getElementById("userscript_show_duplicate")) {
+            button_show.className = "btn btn-secondary"
+            button_show.id = "userscript_show_duplicate"
+            button_show.title = "Show hidden duplicate(s)";
+            button_show.innerHTML = '<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="pencil-alt" class="svg-inline--fa fa-pencil-alt fa-w-16 fa-icon undefined" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="3 5 15 10"><path fill="currentColor" d="M5.114,5.726c0.169,0.168,0.442,0.168,0.611,0c0.168-0.169,0.168-0.442,0-0.61L3.893,3.282c-0.168-0.168-0.442-0.168-0.61,0c-0.169,0.169-0.169,0.442,0,0.611L5.114,5.726z M3.955,10c0-0.239-0.193-0.432-0.432-0.432H0.932C0.693,9.568,0.5,9.761,0.5,10s0.193,0.432,0.432,0.432h2.591C3.761,10.432,3.955,10.239,3.955,10 M10,3.955c0.238,0,0.432-0.193,0.432-0.432v-2.59C10.432,0.693,10.238,0.5,10,0.5S9.568,0.693,9.568,0.932v2.59C9.568,3.762,9.762,3.955,10,3.955 M14.886,5.726l1.832-1.833c0.169-0.168,0.169-0.442,0-0.611c-0.169-0.168-0.442-0.168-0.61,0l-1.833,1.833c-0.169,0.168-0.169,0.441,0,0.61C14.443,5.894,14.717,5.894,14.886,5.726 M5.114,14.274l-1.832,1.833c-0.169,0.168-0.169,0.441,0,0.61c0.168,0.169,0.442,0.169,0.61,0l1.833-1.832c0.168-0.169,0.168-0.442,0-0.611C5.557,14.106,5.283,14.106,5.114,14.274 M19.068,9.568h-2.591c-0.238,0-0.433,0.193-0.433,0.432s0.194,0.432,0.433,0.432h2.591c0.238,0,0.432-0.193,0.432-0.432S19.307,9.568,19.068,9.568 M14.886,14.274c-0.169-0.168-0.442-0.168-0.611,0c-0.169,0.169-0.169,0.442,0,0.611l1.833,1.832c0.168,0.169,0.441,0.169,0.61,0s0.169-0.442,0-0.61L14.886,14.274z M10,4.818c-2.861,0-5.182,2.32-5.182,5.182c0,2.862,2.321,5.182,5.182,5.182s5.182-2.319,5.182-5.182C15.182,7.139,12.861,4.818,10,4.818M10,14.318c-2.385,0-4.318-1.934-4.318-4.318c0-2.385,1.933-4.318,4.318-4.318c2.386,0,4.318,1.933,4.318,4.318C14.318,12.385,12.386,14.318,10,14.318 M10,16.045c-0.238,0-0.432,0.193-0.432,0.433v2.591c0,0.238,0.194,0.432,0.432,0.432s0.432-0.193,0.432-0.432v-2.591C10.432,16.238,10.238,16.045,10,16.045"></path></svg>'
+            document.getElementsByClassName("d-flex mb-2")[0].appendChild(button_show)
+            document.getElementById("userscript_show_duplicate").addEventListener("click", function () {
+                GM_deleteValue("hide_duplicate")
+                // Refresh page, too lazy to change the display again
+                window.location.reload();
+            });
+        }
+    }
+    function count_hidden() {
+        var stored_path = GM_getValue("hide_duplicate", "")
+        if (stored_path) {
+            var count = stored_path.split(",").length
+            var elemnt_text = getElementByXpath("//h6[contains(text(),'duplicates found')]")
+            var text = elemnt_text.textContent.replace(/\..+/gm, ".");
+            elemnt_text.textContent = text + " (Hidden: " + count + ")"
+        }
+    }
+
     function getElementByXpath(xpath) {
         return document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
     }
